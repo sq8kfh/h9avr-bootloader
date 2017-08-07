@@ -291,10 +291,4 @@ struct h9msg {
 
 typedef struct h9msg h9msg_t;
 
-struct can_std_registries {
-	uint16_t node_id;
-};
-
-typedef struct can_std_registries can_std_registries_t;
-
 #endif /* H9MSG_H */

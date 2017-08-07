@@ -15,11 +15,9 @@ typedef struct {
 	uint8_t data[8];
 } can_buf_t;
 
-/*typedef struct {
-	uint8_t id;	//id urzadzenia
-	uint8_t type_id;	//id typu urzadzenia
-	uint8_t response_id;	//id pod ktore nalezy kierowac odpowiedzi
-} can_std_reg_t;*/
+typedef struct can_std_registries {
+	uint16_t node_id;
+} can_std_registries_t;
 
 extern can_std_registries_t can_std_reg;
 
