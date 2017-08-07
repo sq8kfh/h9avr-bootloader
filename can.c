@@ -274,4 +274,5 @@ CAN_init_response_msg(const h9msg_t *req, h9msg_t *res)
 			break;
 	}
 	res->source_id = can_std_reg.node_id;
+	res->destination_id = req->source_id;
 }
