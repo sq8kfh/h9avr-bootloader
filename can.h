@@ -24,7 +24,8 @@ extern can_std_registries_t can_std_reg;
 void CAN_init(uint16_t node_id);
 void CAN_reinit(uint16_t node_id);
 void CAN_send_turned_on_broadcast();
-void CAN_set_mob(uint8_t priority, uint8_t priority_mask, uint8_t type, uint8_t type_mask, uint16_t destination_id, uint16_t destination_id_mask, uint16_t source_id, uint16_t source_id_mask);
+//void CAN_set_mob(uint8_t priority, uint8_t priority_mask, uint8_t type, uint8_t type_mask, uint16_t destination_id, uint16_t destination_id_mask, uint16_t source_id, uint16_t source_id_mask);
+void CAN_set_mob_for_remote_node(uint16_t remote_node_id);
 
 void CAN_put_msg(h9msg_t *cm);
 uint8_t CAN_get_msg(h9msg_t*cm);

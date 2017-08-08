@@ -16,7 +16,9 @@
 #define H9_PRIORITY_HIGH 0
 #define H9_PRIORITY_LOW 1
 
-/* 00...... */
+/* 00...... ALL RESERVED, for exampe for bootloader*/
+#define H9_TYPE_GROUP_0 0
+
 #define H9_TYPE_U0 0
 #define H9_TYPE_U1 1
 #define H9_TYPE_U2 2
@@ -81,13 +83,16 @@
 #define H9_TYPE_U61 61
 #define H9_TYPE_U62 62
 #define H9_TYPE_U63 63
+
 /* 01...... */
-#define H9_TYPE_U64 64
-#define H9_TYPE_U65 65
-#define H9_TYPE_U66 66
-#define H9_TYPE_U67 67
-#define H9_TYPE_U68 68
-#define H9_TYPE_U69 69
+#define H9_TYPE_GROUP_1 64
+
+#define H9_TYPE_REG_EXTERNALLY_CHANGED 64
+#define H9_TYPE_REG_INTERNALLY_CHANGED 65
+#define H9_TYPE_REG_VALUE_BROADCAST 66
+#define H9_TYPE_REG_VALUE 67
+#define H9_TYPE_NODE_HEARTBEAT 68
+#define H9_TYPE_NODE_TURNED_ON 69
 #define H9_TYPE_U70 70
 #define H9_TYPE_U71 71
 #define H9_TYPE_U72 72
@@ -114,14 +119,14 @@
 #define H9_TYPE_U93 93
 #define H9_TYPE_U94 94
 #define H9_TYPE_U95 95
-#define H9_TYPE_REG_EXTERNALLY_CHANGED 96
-#define H9_TYPE_REG_INTERNALLY_CHANGED 97
-#define H9_TYPE_REG_VALUE_BROADCAST 98
-#define H9_TYPE_REG_VALUE 99
+#define H9_TYPE_U96 96
+#define H9_TYPE_U97 97
+#define H9_TYPE_U98 98
+#define H9_TYPE_U99 99
 #define H9_TYPE_U100 100
 #define H9_TYPE_U101 101
-#define H9_TYPE_DEV_HEARTBEAT 102
-#define H9_TYPE_DEV_TURNED_ON 103
+#define H9_TYPE_U100 100
+#define H9_TYPE_U101 101
 #define H9_TYPE_U104 104
 #define H9_TYPE_U105 105
 #define H9_TYPE_U106 106
@@ -146,11 +151,14 @@
 #define H9_TYPE_U125 125
 #define H9_TYPE_U126 126
 #define H9_TYPE_U127 127
+
 /* 10...... */
-#define H9_TYPE_U128 128
-#define H9_TYPE_U129 129
-#define H9_TYPE_U130 130
-#define H9_TYPE_U131 131
+#define H9_TYPE_GROUP_2 128
+
+#define H9_TYPE_SET_REG 128
+#define H9_TYPE_GET_REG 129
+#define H9_TYPE_NODE_INFO 130
+#define H9_TYPE_NODE_RESET 131
 #define H9_TYPE_U132 132
 #define H9_TYPE_U133 133
 #define H9_TYPE_U134 134
@@ -179,8 +187,8 @@
 #define H9_TYPE_U157 157
 #define H9_TYPE_U158 158
 #define H9_TYPE_U159 159
-#define H9_TYPE_SET_REG 160
-#define H9_TYPE_GET_REG 161
+#define H9_TYPE_U160 160
+#define H9_TYPE_U161 161
 #define H9_TYPE_U162 162
 #define H9_TYPE_U163 163
 #define H9_TYPE_U164 164
@@ -211,8 +219,11 @@
 #define H9_TYPE_U189 189
 #define H9_TYPE_U190 190
 #define H9_TYPE_U191 191
-/* 11...... */
-#define H9_TYPE_U192 192
+
+/* 11...... compatibility with broadcast */
+#define H9_TYPE_GROUP_3 192
+
+#define H9_TYPE_DISCOVERY 192
 #define H9_TYPE_U193 193
 #define H9_TYPE_U194 194
 #define H9_TYPE_U195 195
