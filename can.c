@@ -13,6 +13,19 @@ volatile uint8_t can_rx_buf_bottom = 0;
 
 can_std_registries_t can_std_reg;
 
+
+/* for software reset */
+void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
+
+void
+wdt_init(void)
+{
+	MCUSR = 0;
+	wdt_disable();
+
+	return;
+}
+
 ISR(CAN_INT_vect)
 {
 	uint8_t canhpmob = CANHPMOB;
@@ -124,8 +137,11 @@ process_msg(h9msg_t *cm)
 			return 0;
 		}
 		else if (cm->type == H9_TYPE_NODE_RESET && cm->dlc == 0) {
-			wdt_enable(WDTO_15MS);
-			while(1);
+			do {
+				wdt_enable(WDTO_15MS);
+				for(;;) {
+				}
+			} while(0);
 		}
 	}
 	return 1;
