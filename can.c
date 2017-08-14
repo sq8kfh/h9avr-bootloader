@@ -4,15 +4,30 @@
 
 #include "can.h"
 
-#define TX_BUF_NUMBER 1
-volatile int8_t data[8]; 
+#define CAN_RX_BUF_SIZE 16
+#define CAN_RX_BUF_INDEX_MASK 0x0F
+
+typedef struct {
+	uint8_t canidt1;
+	uint8_t canidt2;
+	uint8_t canidt3;
+	uint8_t canidt4;
+	uint8_t cancdmob;
+	uint8_t data[8];
+} can_buf_t;
+
 
 can_buf_t can_rx_buf[CAN_RX_BUF_SIZE];
 volatile uint8_t can_rx_buf_top = 0;
 volatile uint8_t can_rx_buf_bottom = 0;
 
+typedef struct can_std_registries {
+	uint16_t node_id;
+} can_std_registries_t;
+
 can_std_registries_t can_std_reg;
 
+void (*save_node_id)(uint16_t node_id);
 
 /* for software reset */
 void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
@@ -43,11 +58,6 @@ ISR(CAN_INT_vect)
 				can_rx_buf[can_rx_buf_top].data[i] = CANMSG;
 			}
 			can_rx_buf_top = (uint8_t)((can_rx_buf_top + 1) & CAN_RX_BUF_INDEX_MASK);
-			/*CANIDM1 = 0;
-			CANIDM2 = 0;
-			CANIDT3 = can_std_reg.node_id;
-			CANIDM3 = 0xff;
-			CANIDM4 = 1 << IDEMSK;*/
 			CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob
 		}
 		else if (CANSTMOB & (1 << TXOK)) {
@@ -96,7 +106,8 @@ process_msg(h9msg_t *cm)
 					cm_res.dlc = 2;
 					break;
 				case 1: //node id
-					can_std_reg.node_id = (cm->data[1] & 0x01) << 8 | cm->data[2];
+					save_node_id((cm->data[1] & 0x01) << 8 | cm->data[2]);
+					
 					cm_res.data[1] = (can_std_reg.node_id >> 8) & 0x01;
 					cm_res.data[2] = (can_std_reg.node_id) & 0xff;
 					cm_res.dlc = 3;
@@ -148,9 +159,30 @@ process_msg(h9msg_t *cm)
 }
 
 void
-CAN_reinit(uint16_t node_id)
+CAN_init(uint16_t node_id, void (*save_node_id_fun)(uint16_t))
 {
-	can_std_reg.node_id = node_id;
+	save_node_id = save_node_id_fun;
+	if (node_id > 0 && node_id < H9_BROADCAST_ID) {
+		can_std_reg.node_id = node_id & ((1<<H9_SOURCE_ID_BIT_LENGTH)-1);
+	}
+	else {
+		can_std_reg.node_id = 0;
+	}
+	
+	CANGCON = ( 1 << SWRES );   // Software reset 
+	CANTCON = 0x00;         // CAN timing prescaler set to 0; 
+
+	#if F_CPU == 4000000UL
+		CANBT1 = 0x06;
+		CANBT2 = 0x04;
+		CANBT3 = 0x13;
+	#elif F_CPU == 16000000UL
+		CANBT1 = 0x1e;
+		CANBT2 = 0x04;
+		CANBT3 = 0x13;
+	#else
+		#error "Please specify F_CPU"
+	#endif
 
 	for ( int8_t mob=0; mob<6; mob++ ) { 
 		CANPAGE = ( mob << MOBNB0 );        // Selects Message Object 0-5
@@ -171,22 +203,6 @@ CAN_reinit(uint16_t node_id)
 	CANIDM4 |= 1 << IDEMSK; // set filter
 		
 	CANIE2 = ( 1 << IEMOB0 ) | ( 1 << IEMOB1 ) | ( 1 << IEMOB2 ); //interupt mob 0 1 and 2
-}
-
-void
-CAN_init(uint16_t node_id)
-{
-	CANGCON = ( 1 << SWRES );   // Software reset 
-	CANTCON = 0x00;         // CAN timing prescaler set to 0; 
-
-	/*
-	http://karmacarpentry.com/can_calc.html?clock=8000000&baud=125000&quanta=16&propseg=2&phaseseg1=7&phaseseg2=6
-	*/
-	CANBT1 = 0x1e;
-	CANBT2 = 0x04;
-	CANBT3 = 0x12;
-
-	CAN_reinit(node_id);
 
 	CANGIE = (1<<ENBOFF) | (1<<ENIT) | (1<<ENRX) | (1<<ENTX) | (1<<ENERR) | (1<<ENBX) | (1<<ENERG);
 	CANGCON = 1<<ENASTB;
@@ -203,23 +219,6 @@ CAN_send_turned_on_broadcast()
 		cm.dlc = 0;
 		CAN_put_msg(&cm);
 }
-
-/*
-void
-CAN_set_mob(uint8_t priority, uint8_t priority_mask,
-            uint8_t type, uint8_t type_mask,
-			uint16_t destination_id, uint16_t destination_id_mask,
-			uint16_t source_id, uint16_t source_id_mask)
-{
-		CANPAGE = 0x03 << MOBNB0; //select mob 3
-		set_can_id(priority, type, destination_id, source_id);
-		set_can_id_mask(priority_mask, type_mask, destination_id_mask, source_id_mask);
-		CANIDM4 |= 1 << IDEMSK; // set filter
-		CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
-		
-		CANIE2 |= 1 << IEMOB3;
-}
-*/
 
 void
 CAN_set_mob_for_remote_node(uint16_t remote_node_id)
