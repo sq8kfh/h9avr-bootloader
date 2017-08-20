@@ -154,6 +154,10 @@ process_msg(h9msg_t *cm)
 				}
 			} while(0);
 		}
+		else if (cm->type == H9_TYPE_NODE_UPDATE && cm->dlc == 0) {
+			cli();
+			asm volatile ("jmp	0x3f00");
+		}
 	}
 	return 1;
 }
