@@ -21,10 +21,6 @@ can_buf_t can_rx_buf[CAN_RX_BUF_SIZE];
 volatile uint8_t can_rx_buf_top = 0;
 volatile uint8_t can_rx_buf_bottom = 0;
 
-typedef struct can_std_registries {
-	uint16_t node_id;
-} can_std_registries_t;
-
 can_std_registries_t can_std_reg;
 
 void (*save_node_id)(uint16_t node_id);
@@ -225,7 +221,7 @@ CAN_send_turned_on_broadcast()
 }
 
 void
-CAN_set_mob_for_remote_node(uint16_t remote_node_id)
+CAN_set_mob_for_remote_node1(uint16_t remote_node_id)
 {
 		CANPAGE = 0x03 << MOBNB0; //select mob 3
 		set_can_id(0, H9_TYPE_GROUP_1, 0, remote_node_id);
@@ -234,6 +230,30 @@ CAN_set_mob_for_remote_node(uint16_t remote_node_id)
 		CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
 		
 		CANIE2 |= 1 << IEMOB3;
+}
+
+void
+CAN_set_mob_for_remote_node2(uint16_t remote_node_id)
+{
+	CANPAGE = 0x04 << MOBNB0; //select mob 3
+	set_can_id(0, H9_TYPE_GROUP_1, 0, remote_node_id);
+	set_can_id_mask(0, H9_TYPE_GROUP_1, 0, (1<<H9_SOURCE_ID_BIT_LENGTH)-1);
+	CANIDM4 |= 1 << IDEMSK; // set filter
+	CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
+	
+	CANIE2 |= 1 << IEMOB4;
+}
+
+void
+CAN_set_mob_for_remote_node3(uint16_t remote_node_id)
+{
+	CANPAGE = 0x05 << MOBNB0; //select mob 3
+	set_can_id(0, H9_TYPE_GROUP_1, 0, remote_node_id);
+	set_can_id_mask(0, H9_TYPE_GROUP_1, 0, (1<<H9_SOURCE_ID_BIT_LENGTH)-1);
+	CANIDM4 |= 1 << IDEMSK; // set filter
+	CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
+	
+	CANIE2 |= 1 << IEMOB5;
 }
 
 /*
