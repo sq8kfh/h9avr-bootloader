@@ -1,0 +1,14 @@
+# General
+.DS_Store
+.idea
+*.cbp
+*.pid
+*.out
+
+# CMake
+cmake-build-debug/
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+build/
