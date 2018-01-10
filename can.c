@@ -29,7 +29,7 @@ void write_node_id(uint16_t id) {
 	cli();
 	eeprom_write_word(&ee_node_id, id);
 	sei();
-	read_node_id();
+	//read_node_id();
 }
 
 
