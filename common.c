@@ -36,13 +36,6 @@ void init_common_CAN(void) {
         CANCDMOB = 0x00;             // Disable mob
         CANSTMOB = 0x00;             // Clear mob status register;
     }
-
-    // 1st msg filter
-    CANPAGE = 0x01 << MOBNB0; //select mob 1 for unicast
-    set_CAN_id(0, 0, can_node_id, 0);
-    set_CAN_id_mask(0, 0, (1<<H9_DESTINATION_ID_BIT_LENGTH)-1, 0);
-    CANIDM4 |= 1 << IDEMSK; // set filter
-    CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
 }
 
 

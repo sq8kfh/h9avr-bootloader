@@ -9,6 +9,13 @@
 void init_bootloader_CAN(void) {
     init_common_CAN();
 
+    // 1st msg filter
+    CANPAGE = 0x01 << MOBNB0;
+    set_CAN_id(0, H9_TYPE_GROUP_0, can_node_id, 0);
+    set_CAN_id_mask(0, H9_TYPE_GROUP_MASK, (1<<H9_DESTINATION_ID_BIT_LENGTH)-1, 0);
+    CANIDM4 |= 1 << IDEMSK;
+    CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
+
 	CANGCON = 1<<ENASTB;
 }
 
