@@ -82,21 +82,13 @@ uint8_t process_msg(h9msg_t *cm) {
 			CAN_init_response_msg(cm, &cm_res);
 			cm_res.dlc = 2;
 			cm_res.data[0] = cm->data[0];
-			switch (cm_res.data[0]) {
-				case 0: //flags
-					cm_res.data[1] = 0;
-					cm_res.dlc = 2;
-					break;
-				case 1: //node id
-                    write_node_id((cm->data[1] & 0x01) << 8 | cm->data[2]);
-					
-					cm_res.data[1] = (can_node_id >> 8) & 0x01;
-					cm_res.data[2] = (can_node_id) & 0xff;
-					cm_res.dlc = 3;
-					break;
-				default:
-					return 0;
-			}
+            if (cm_res.data[0] == 1 && cm->dlc == 3) { //reg 1
+                write_node_id((cm->data[1] & 0x01) << 8 | cm->data[2]);
+
+                cm_res.data[1] = (can_node_id >> 8) & 0x01;
+                cm_res.data[2] = (can_node_id) & 0xff;
+                cm_res.dlc = 3;
+            }
 			CAN_put_msg(&cm_res);
 			return 0;
 		}
