@@ -12,7 +12,7 @@ void init_bootloader_CAN(void) {
     // 1st msg filter
     CANPAGE = 0x01 << MOBNB0;
     set_CAN_id(0, H9_TYPE_GROUP_0, can_node_id, 0);
-    set_CAN_id_mask(0, H9_TYPE_GROUP_MASK, (1<<H9_DESTINATION_ID_BIT_LENGTH)-1, 0);
+    set_CAN_id_mask(0, H9_TYPE_SUBGROUP_MASK, (1<<H9_DESTINATION_ID_BIT_LENGTH)-1, 0);
     CANIDM4 |= 1 << IDEMSK;
     CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
 
@@ -35,7 +35,7 @@ void CAN_get_msg(h9msg_t *cm) {
     }
 
     cm->priority = (canidt1 >> 7) & 0x01;
-    cm->type = ((canidt1 << 1) & 0xfe) | ((canidt2 >> 7) & 0x01);
+    cm->type = (canidt1 >> 2) & 0x1f;
     cm->destination_id = ((canidt2 << 4) & 0x1f0) | ((canidt3 >> 4) & 0x0f);
     cm->source_id = ((canidt3 << 5) & 0x1e0) | ((canidt4 >> 3) & 0x1f);
 
@@ -128,7 +128,6 @@ int main(void) {
     cli();
 	PORTC = (PORTC & 0x0C) | (0xaa & 0xF3);
 	PORTD = (PORTD & 0xFC) | ((0xaa>>2) & 0x03);
-	/* Replace with your application code */
 	
 	init_bootloader_CAN();
 	

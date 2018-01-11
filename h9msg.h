@@ -17,6 +17,7 @@
 #define H9_PRIORITY_LOW 1
 
 #define H9_TYPE_GROUP_MASK 24
+#define H9_TYPE_SUBGROUP_MASK 28
 
 /* 00.... BOOTLOADER + NOP*/
 #define H9_TYPE_GROUP_0 0

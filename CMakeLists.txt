@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 
 project(h9-bootloader)
 
-set(SOURCE_FILES bootloader.c common.c h9node.h)
+set(SOURCE_FILES bootloader.c common.c common.h h9msg.h h9node.h)
 
 
 set(CMAKE_SYSTEM_NAME Generic)
