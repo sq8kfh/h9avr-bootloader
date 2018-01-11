@@ -11,8 +11,8 @@ void init_bootloader_CAN(void) {
 
     // 1st msg filter
     CANPAGE = 0x01 << MOBNB0;
-    set_CAN_id(0, H9_TYPE_GROUP_0, can_node_id, 0);
-    set_CAN_id_mask(0, H9_TYPE_SUBGROUP_MASK, (1<<H9_DESTINATION_ID_BIT_LENGTH)-1, 0);
+    set_CAN_id(0, H9MSG_TYPE_GROUP_0, can_node_id, 0);
+    set_CAN_id_mask(0, H9MSG_TYPE_SUBGROUP_MASK, (1<<H9MSG_DESTINATION_ID_BIT_LENGTH)-1, 0);
     CANIDM4 |= 1 << IDEMSK;
     CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
 
@@ -54,7 +54,7 @@ void write_page(uint16_t page, uint16_t dst_id) {
     while (1) {
         h9msg_t cm;
         CAN_get_msg(&cm);
-        if (cm.source_id == dst_id && cm.type == H9_TYPE_PAGE_FILL && cm.dlc == 8) {
+        if (cm.source_id == dst_id && cm.type == H9MSG_TYPE_PAGE_FILL && cm.dlc == 8) {
             uint16_t w = cm.data[1] << 8;
             w |= cm.data[0];
 
@@ -84,7 +84,7 @@ void write_page(uint16_t page, uint16_t dst_id) {
             cm_res.destination_id = dst_id;
 
             if (bytes_remain == 0) {
-                cm_res.type = H9_TYPE_PAGE_WRITED;
+                cm_res.type = H9MSG_TYPE_PAGE_WRITED;
                 cm_res.dlc = 2;
                 cm_res.data[0] = (page >> 8) & 0xff;
                 cm_res.data[1] = (page) & 0xff;
@@ -97,19 +97,19 @@ void write_page(uint16_t page, uint16_t dst_id) {
                 break;
             }
             else {
-                cm_res.type = H9_TYPE_PAGE_FILL_NEXT;
+                cm_res.type = H9MSG_TYPE_PAGE_FILL_NEXT;
                 cm_res.dlc = 2;
                 cm_res.data[0] = (bytes_remain >> 8) & 0xff;
                 cm_res.data[1] = (bytes_remain) & 0xff;
                 CAN_put_msg(&cm_res);
             }
         }
-        else if (cm.source_id == dst_id && (cm.type & H9_TYPE_GROUP_MASK) == H9_TYPE_GROUP_0) {
+        else if (cm.source_id == dst_id && (cm.type & H9MSG_TYPE_GROUP_MASK) == H9MSG_TYPE_GROUP_0) {
             h9msg_t cm_res;
             CAN_init_new_msg(&cm_res);
 
             cm_res.destination_id = dst_id;
-            cm_res.type = H9_TYPE_PAGE_FILL_BREAK;
+            cm_res.type = H9MSG_TYPE_PAGE_FILL_BREAK;
 
             CAN_put_msg(&cm_res);
             break;
@@ -134,7 +134,7 @@ int main(void) {
 	h9msg_t cm;
 	CAN_init_new_msg(&cm);
 
-	cm.type = H9_TYPE_ENTER_INTO_BOOTLOADER;
+	cm.type = H9MSG_TYPE_ENTER_INTO_BOOTLOADER;
 	cm.destination_id = 0x1ff;
 	cm.dlc = 0;
 	CAN_put_msg(&cm);
@@ -142,14 +142,14 @@ int main(void) {
 	while (1) {
         h9msg_t cm;
         CAN_get_msg(&cm);
-        if (cm.type == H9_TYPE_PAGE_START && cm.dlc == 2) {
+        if (cm.type == H9MSG_TYPE_PAGE_START && cm.dlc == 2) {
             uint16_t page = cm.data[0] << 8 | cm.data[1];
 
             h9msg_t cm_res;
             CAN_init_new_msg(&cm_res);
 
             cm_res.destination_id = cm.source_id;
-            cm_res.type = H9_TYPE_PAGE_FILL_NEXT;
+            cm_res.type = H9MSG_TYPE_PAGE_FILL_NEXT;
             cm_res.dlc = 2;
             cm_res.data[0] = (SPM_PAGESIZE >> 8) & 0xff;
             cm_res.data[1] = (SPM_PAGESIZE) & 0xff;
@@ -158,7 +158,7 @@ int main(void) {
 
             write_page(page, cm.source_id);
         }
-        if (cm.type == H9_TYPE_QUIT_BOOTLOADER && cm.dlc == 0) {
+        if (cm.type == H9MSG_TYPE_QUIT_BOOTLOADER && cm.dlc == 0) {
             MCUCR &= ~(1<<IVSEL);
             asm volatile ("jmp	0x0000");
         }

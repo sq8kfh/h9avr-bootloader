@@ -5,8 +5,8 @@ uint16_t ee_node_id EEMEM = 0;
 
 void read_node_id(void) {
     uint16_t node_id = eeprom_read_word(&ee_node_id);
-    if (node_id > 0 && node_id < H9_BROADCAST_ID) {
-        can_node_id = node_id & ((1<<H9_SOURCE_ID_BIT_LENGTH)-1);
+    if (node_id > 0 && node_id < H9MSG_BROADCAST_ID) {
+        can_node_id = node_id & ((1<<H9MSG_SOURCE_ID_BIT_LENGTH)-1);
     }
     else {
         can_node_id = 0;
@@ -55,7 +55,7 @@ void CAN_put_msg(h9msg_t *cm) {
 
 
 void CAN_init_new_msg(h9msg_t *mes) {
-    mes->priority = H9_PRIORITY_LOW;
+    mes->priority = H9MSG_PRIORITY_LOW;
     mes->source_id = can_node_id;
     mes->dlc = 0;
 }
@@ -63,7 +63,7 @@ void CAN_init_new_msg(h9msg_t *mes) {
 
 void set_CAN_id(uint8_t priority, uint8_t type, uint16_t destination_id, uint16_t source_id) {
     CANIDT1 = ((priority << 7) & 0x80) | ((type << 2) & 0x7c);
-    CANIDT2 = ((H9_RESERVED_VALUE << 5) & 0x60) | ((destination_id >> 4) & 0x1f);
+    CANIDT2 = ((H9MSG_RESERVED_VALUE << 5) & 0x60) | ((destination_id >> 4) & 0x1f);
     CANIDT3 = ((destination_id << 4) & 0xf0) | ((source_id >> 5) & 0x0f);
     CANIDT4 = ((source_id << 3) & 0xf8);
 }
