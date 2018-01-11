@@ -62,16 +62,16 @@ void CAN_init_new_msg(h9msg_t *mes) {
 
 
 void set_CAN_id(uint8_t priority, uint8_t type, uint16_t destination_id, uint16_t source_id) {
-    CANIDT1 = ((priority << 7) & 0x80) | ((type >> 1) & 0x7f);
-    CANIDT2 = ((type << 7) & 0x80) | ((H9_RESERVED_VALUE << 5) & 0x60) | ((destination_id >> 4) & 0x1f);
+    CANIDT1 = ((priority << 7) & 0x80) | ((type << 2) & 0x7c);
+    CANIDT2 = ((H9_RESERVED_VALUE << 5) & 0x60) | ((destination_id >> 4) & 0x1f);
     CANIDT3 = ((destination_id << 4) & 0xf0) | ((source_id >> 5) & 0x0f);
     CANIDT4 = ((source_id << 3) & 0xf8);
 }
 
 
 void set_CAN_id_mask(uint8_t priority, uint8_t type, uint16_t destination_id, uint16_t source_id) {
-    CANIDM1 = ((priority << 7) & 0x80) | ((type >> 1) & 0x7f);
-    CANIDM2 = ((type << 7) & 0x80) /*| ((H9_RESERVED_VALUE << 5) & 0x60)*/ | ((destination_id >> 4) & 0x1f);
+    CANIDM1 = ((priority << 7) & 0x80) | ((type << 2) & 0x7c);
+    CANIDM2 = /*((H9_RESERVED_VALUE << 5) & 0x60) |*/ ((destination_id >> 4) & 0x1f);
     CANIDM3 = ((destination_id << 4) & 0xf0) | ((source_id >> 5) & 0x0f);
     CANIDM4 = ((source_id << 3) & 0xf8);
 }

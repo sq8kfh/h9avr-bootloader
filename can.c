@@ -212,7 +212,7 @@ void CAN_set_mob_for_remote_node3(uint16_t remote_node_id) {
 uint8_t CAN_get_msg(h9msg_t *cm) {
 	if (can_rx_buf_top != can_rx_buf_bottom) {
 		cm->priority = (can_rx_buf[can_rx_buf_bottom].canidt1 >> 7) & 0x01;
-		cm->type = ((can_rx_buf[can_rx_buf_bottom].canidt1 << 1) & 0xfe) | ((can_rx_buf[can_rx_buf_bottom].canidt2 >> 7) & 0x01);
+		cm->type = ((can_rx_buf[can_rx_buf_bottom].canidt1 >> 2) & 0x1f);
 		cm->destination_id = ((can_rx_buf[can_rx_buf_bottom].canidt2 << 4) & 0x1f0) | ((can_rx_buf[can_rx_buf_bottom].canidt3 >> 4) & 0x0f);
 		cm->source_id = ((can_rx_buf[can_rx_buf_bottom].canidt3 << 5) & 0x1e0) | ((can_rx_buf[can_rx_buf_bottom].canidt4 >> 3) & 0x1f);
 
