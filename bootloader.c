@@ -11,8 +11,8 @@ void init_bootloader_CAN(void) {
 
     // 1st msg filter
     CANPAGE = 0x01 << MOBNB0;
-    set_CAN_id(0, H9MSG_TYPE_GROUP_0, can_node_id, 0);
-    set_CAN_id_mask(0, H9MSG_TYPE_SUBGROUP_MASK, (1<<H9MSG_DESTINATION_ID_BIT_LENGTH)-1, 0);
+    set_CAN_id(0, H9MSG_TYPE_GROUP_0, 0, can_node_id, 0);
+    set_CAN_id_mask(0, H9MSG_TYPE_SUBGROUP_MASK, 0, (1<<H9MSG_DESTINATION_ID_BIT_LENGTH)-1, 0);
     CANIDM4 |= 1 << IDEMSK;
     CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
 
@@ -36,6 +36,7 @@ void CAN_get_msg(h9msg_t *cm) {
 
     cm->priority = (canidt1 >> 7) & 0x01;
     cm->type = (canidt1 >> 2) & 0x1f;
+    cm->seqnum = ((canidt1 >> 5) & 0x18) | ((canidt2 >> 5) & 0x0f);
     cm->destination_id = ((canidt2 << 4) & 0x1f0) | ((canidt3 >> 4) & 0x0f);
     cm->source_id = ((canidt3 << 5) & 0x1e0) | ((canidt4 >> 3) & 0x1f);
 
@@ -54,6 +55,12 @@ void write_page(uint16_t page, uint16_t dst_id) {
     while (1) {
         h9msg_t cm;
         CAN_get_msg(&cm);
+
+        h9msg_t cm_res;
+        CAN_init_new_msg(&cm_res);
+        cm_res.seqnum = cm.seqnum;
+        cm_res.destination_id = dst_id;
+
         if (cm.source_id == dst_id && cm.type == H9MSG_TYPE_PAGE_FILL && cm.dlc == 8) {
             uint16_t w = cm.data[1] << 8;
             w |= cm.data[0];
@@ -79,10 +86,6 @@ void write_page(uint16_t page, uint16_t dst_id) {
             boot_page_fill_safe(page + (SPM_PAGESIZE-bytes_remain), w);
             bytes_remain -= 2;
 
-            h9msg_t cm_res;
-            CAN_init_new_msg(&cm_res);
-            cm_res.destination_id = dst_id;
-
             if (bytes_remain == 0) {
                 cm_res.type = H9MSG_TYPE_PAGE_WRITED;
                 cm_res.dlc = 2;
@@ -105,10 +108,6 @@ void write_page(uint16_t page, uint16_t dst_id) {
             }
         }
         else if (cm.source_id == dst_id && (cm.type & H9MSG_TYPE_GROUP_MASK) == H9MSG_TYPE_GROUP_0) {
-            h9msg_t cm_res;
-            CAN_init_new_msg(&cm_res);
-
-            cm_res.destination_id = dst_id;
             cm_res.type = H9MSG_TYPE_PAGE_FILL_BREAK;
 
             CAN_put_msg(&cm_res);
@@ -135,8 +134,9 @@ int main(void) {
 	CAN_init_new_msg(&cm);
 
 	cm.type = H9MSG_TYPE_ENTER_INTO_BOOTLOADER;
+	//cm.seqnum = 1;
 	cm.destination_id = 0x1ff;
-	cm.dlc = 0;
+	//cm.dlc = 0;
 	CAN_put_msg(&cm);
 	
 	while (1) {
@@ -149,6 +149,7 @@ int main(void) {
             CAN_init_new_msg(&cm_res);
 
             cm_res.destination_id = cm.source_id;
+            cm_res.seqnum = cm.seqnum;
             cm_res.type = H9MSG_TYPE_PAGE_FILL_NEXT;
             cm_res.dlc = 2;
             cm_res.data[0] = (SPM_PAGESIZE >> 8) & 0xff;

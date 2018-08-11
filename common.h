@@ -14,7 +14,7 @@ void read_node_id(void);
 void init_common_CAN(void);
 void CAN_put_msg(h9msg_t *cm);
 void CAN_init_new_msg(h9msg_t *mes);
-void set_CAN_id(uint8_t priority, uint8_t type, uint16_t destination_id, uint16_t source_id);
-void set_CAN_id_mask(uint8_t priority, uint8_t type, uint16_t destination_id, uint16_t source_id);
+void set_CAN_id(uint8_t priority, uint8_t type, uint8_t seqnum, uint16_t destination_id, uint16_t source_id);
+void set_CAN_id_mask(uint8_t priority, uint8_t type, uint8_t seqnum, uint16_t destination_id, uint16_t source_id);
 
 #endif //_COMMON_H_
