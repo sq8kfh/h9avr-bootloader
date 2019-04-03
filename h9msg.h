@@ -71,13 +71,13 @@
 // -- -- -- | pp ty ty ty ty ty se se | se se se ds ds ds ds ds | ds ds ds ds so so so so | so so so so so
 
 struct h9msg {
-	uint8_t priority :H9MSG_PRIORITY_BIT_LENGTH;
-	uint8_t type :H9MSG_TYPE_BIT_LENGTH;
+    uint8_t priority :H9MSG_PRIORITY_BIT_LENGTH;
+    uint8_t type :H9MSG_TYPE_BIT_LENGTH;
     uint8_t seqnum: H9MSG_SEQNUM_BIT_LENGTH;
-	uint16_t destination_id :H9MSG_DESTINATION_ID_BIT_LENGTH;
-	uint16_t source_id :H9MSG_SOURCE_ID_BIT_LENGTH;
-	uint8_t dlc;
-	uint8_t data[8];
+    uint16_t destination_id :H9MSG_DESTINATION_ID_BIT_LENGTH;
+    uint16_t source_id :H9MSG_SOURCE_ID_BIT_LENGTH;
+    uint8_t dlc;
+    uint8_t data[8];
 };
 
 typedef struct h9msg h9msg_t;

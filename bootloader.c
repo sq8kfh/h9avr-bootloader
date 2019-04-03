@@ -127,9 +127,9 @@ int main(void) {
     cli();
     PORTC = (PORTC & 0x0C) | (0xaa & 0xF3);
     PORTD = (PORTD & 0xFC) | ((0xaa>>2) & 0x03);
-	
+    
     init_bootloader_CAN();
-	
+    
     h9msg_t cm;
     CAN_init_new_msg(&cm);
 
@@ -138,7 +138,7 @@ int main(void) {
     cm.destination_id = 0x1ff;
     //cm.dlc = 0;
     CAN_put_msg(&cm);
-	
+    
     while (1) {
         h9msg_t cm;
         CAN_get_msg(&cm);
@@ -161,7 +161,7 @@ int main(void) {
         }
         if (cm.type == H9MSG_TYPE_QUIT_BOOTLOADER && cm.dlc == 0) {
             MCUCR &= ~(1<<IVSEL);
-            asm volatile ("jmp	0x0000");
+            asm volatile ("jmp  0x0000");
         }
 
     }

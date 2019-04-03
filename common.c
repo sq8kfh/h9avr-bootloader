@@ -40,9 +40,9 @@ void init_common_CAN(void) {
 
 
 void CAN_put_msg(h9msg_t *cm) {
-    CANPAGE = 0 << MOBNB0;      		// Select MOb0 for transmission
+    CANPAGE = 0 << MOBNB0;              // Select MOb0 for transmission
     while ( CANEN2 & ( 1 << ENMOB0 ) ); // Wait for MOb 0 to be free
-    CANSTMOB = 0x00;       				// Clear mob status register
+    CANSTMOB = 0x00;                    // Clear mob status register
 
     set_CAN_id(cm->priority, cm->type, cm->seqnum, cm->destination_id, cm->source_id);
 
