@@ -16,7 +16,7 @@ void init_bootloader_CAN(void) {
     CANIDM4 |= 1 << IDEMSK;
     CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
 
-	CANGCON = 1<<ENASTB;
+    CANGCON = 1<<ENASTB;
 }
 
 
@@ -117,29 +117,29 @@ void write_page(uint16_t page, uint16_t dst_id) {
 }
 
 int main(void) {
-	DDRB = 0xff;
-	DDRC = 0xff;
-	DDRD = 0xff;
-	DDRE = 0xff;
+    DDRB = 0xff;
+    DDRC = 0xff;
+    DDRD = 0xff;
+    DDRE = 0xff;
     cli();
     MCUCR |= (1<<IVCE);
-	MCUCR |= (1<<IVSEL);
+    MCUCR |= (1<<IVSEL);
     cli();
-	PORTC = (PORTC & 0x0C) | (0xaa & 0xF3);
-	PORTD = (PORTD & 0xFC) | ((0xaa>>2) & 0x03);
+    PORTC = (PORTC & 0x0C) | (0xaa & 0xF3);
+    PORTD = (PORTD & 0xFC) | ((0xaa>>2) & 0x03);
 	
-	init_bootloader_CAN();
+    init_bootloader_CAN();
 	
-	h9msg_t cm;
-	CAN_init_new_msg(&cm);
+    h9msg_t cm;
+    CAN_init_new_msg(&cm);
 
-	cm.type = H9MSG_TYPE_ENTER_INTO_BOOTLOADER;
-	//cm.seqnum = 1;
-	cm.destination_id = 0x1ff;
-	//cm.dlc = 0;
-	CAN_put_msg(&cm);
+    cm.type = H9MSG_TYPE_ENTER_INTO_BOOTLOADER;
+    //cm.seqnum = 1;
+    cm.destination_id = 0x1ff;
+    //cm.dlc = 0;
+    CAN_put_msg(&cm);
 	
-	while (1) {
+    while (1) {
         h9msg_t cm;
         CAN_get_msg(&cm);
         if (cm.type == H9MSG_TYPE_PAGE_START && cm.dlc == 2) {
@@ -164,7 +164,6 @@ int main(void) {
             asm volatile ("jmp	0x0000");
         }
 
-	}
+    }
 }
-
 

@@ -253,3 +253,4 @@ void CAN_init_response_msg(const h9msg_t *req, h9msg_t *res) {
     res->seqnum = req->seqnum;
 	res->destination_id = req->source_id;
 }
+
