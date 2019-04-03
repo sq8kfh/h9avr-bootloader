@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.4)
 
-project(h9-bootloader)
+project(h9avr-bootloader)
 
 set(SOURCE_FILES bootloader.c common.c common.h h9msg.h h9node.h)
 
@@ -83,8 +83,8 @@ add_custom_command(
         COMMENT "Post processsing"
 )
 
-add_custom_target("flashbl"
+add_custom_target("flash_bl"
         ${AVRDUDE} -p ${MMCU} -c ${PROGRAMMER} -U ${HEX_FILE}
         DEPENDS ${PROJECT_NAME}
-        COMMENT "Uploading"
+        COMMENT "Uploading bootloader"
         )
