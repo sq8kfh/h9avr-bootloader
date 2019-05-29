@@ -1,3 +1,11 @@
+/*
+ * h9avr-can
+ *
+ * Created by SQ8KFH on 2017-08-07.
+ *
+ * Copyright (C) 2017-2019 Kamil Palkowski. All rights reserved.
+ */
+
 #ifndef H9MSG_H
 #define H9MSG_H
 

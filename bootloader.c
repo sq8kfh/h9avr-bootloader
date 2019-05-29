@@ -1,3 +1,11 @@
+/*
+ * h9avr-can
+ *
+ * Created by SQ8KFH on 2018-01-01.
+ *
+ * Copyright (C) 2018-2019 Kamil Palkowski. All rights reserved.
+ */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/boot.h>
