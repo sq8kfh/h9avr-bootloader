@@ -6,6 +6,8 @@
  * Copyright (C) 2018-2019 Kamil Palkowski. All rights reserved.
  */
 
+#include "config.h"
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/boot.h>
@@ -66,6 +68,7 @@ void write_page(uint16_t page, uint16_t dst_id) {
 
         h9msg_t cm_res;
         CAN_init_new_msg(&cm_res);
+        cm_res.priority = H9MSG_PRIORITY_HIGH;
         cm_res.seqnum = cm.seqnum;
         cm_res.destination_id = dst_id;
 
@@ -141,10 +144,12 @@ int main(void) {
     h9msg_t cm;
     CAN_init_new_msg(&cm);
 
-    cm.type = H9MSG_TYPE_ENTER_INTO_BOOTLOADER;
-    //cm.seqnum = 1;
-    cm.destination_id = 0x1ff;
-    //cm.dlc = 0;
+    cm.type = H9MSG_TYPE_BOOTLOADER_TURNED_ON;
+    cm.priority = H9MSG_PRIORITY_HIGH;
+    cm.destination_id = H9MSG_BROADCAST_ID;
+    cm.dlc = 2;
+    cm.data[0] = (NODE_TYPE >> 8) & 0xff;
+    cm.data[1] = (NODE_TYPE) & 0xff;
     CAN_put_msg(&cm);
     
     while (1) {

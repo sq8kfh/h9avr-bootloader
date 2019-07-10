@@ -4,6 +4,7 @@ project(h9avr-bootloader)
 
 set(SOURCE_FILES bootloader.c common.c common.h h9msg.h)
 
+configure_file(config.h.in config.h)
 
 set(CMAKE_SYSTEM_NAME Generic)
 
