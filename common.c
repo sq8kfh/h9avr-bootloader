@@ -3,7 +3,7 @@
  *
  * Created by SQ8KFH on 2018-01-01.
  *
- * Copyright (C) 2018-2019 Kamil Palkowski. All rights reserved.
+ * Copyright (C) 2018-2020 Kamil Palkowski. All rights reserved.
  */
 
 #include "common.h"
