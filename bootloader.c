@@ -1,5 +1,5 @@
 /*
- * h9avr-can
+ * h9avr-bootloader
  *
  * Created by SQ8KFH on 2018-01-01.
  *
@@ -13,57 +13,9 @@
 #include <avr/boot.h>
 
 #include "h9msg.h"
-#include "common.h"
+#include "can.h"
 
-
-void init_bootloader_CAN(void) {
-    init_common_CAN();
-
-    // 1st msg filter
-    CANPAGE = 0x01 << MOBNB0;
-    set_CAN_id(0, H9MSG_TYPE_GROUP_0, 0, can_node_id, 0);
-    set_CAN_id_mask(0, H9MSG_TYPE_SUBGROUP_MASK, 0, (1<<H9MSG_DESTINATION_ID_BIT_LENGTH)-1, 0);
-    CANIDM4 |= 1 << IDEMSK;
-    CANCDMOB = (1<<CONMOB1) | (1<<IDE); //rx mob, 29-bit only
-
-    CANGCON = 1<<ENASTB;
-}
-
-
-uint8_t CAN_get_msg_blocking(h9msg_t *cm) {
-    uint32_t timeout_counter = 0x1fffff;
-
-    while (timeout_counter) {
-        CANPAGE = 0x01 << MOBNB0;
-        if (CANSTMOB & (1 << RXOK)) {
-
-            uint8_t canidt1 = CANIDT1;
-            uint8_t canidt2 = CANIDT2;
-            uint8_t canidt3 = CANIDT3;
-            uint8_t canidt4 = CANIDT4;
-            uint8_t cancdmob = CANCDMOB & 0x1f;
-
-            for (uint8_t i = 0; i < 8; ++i) {
-                cm->data[i] = CANMSG;
-            }
-
-            cm->priority = (canidt1 >> 7) & 0x01;
-            cm->type = (canidt1 >> 2) & 0x1f;
-            cm->seqnum = ((canidt1 >> 5) & 0x18) | ((canidt2 >> 5) & 0x0f);
-            cm->destination_id = ((canidt2 << 4) & 0x1f0) | ((canidt3 >> 4) & 0x0f);
-            cm->source_id = ((canidt3 << 5) & 0x1e0) | ((canidt4 >> 3) & 0x1f);
-
-            cm->dlc = cancdmob & 0x0f;
-
-            CANCDMOB = (1 << CONMOB1) | (1 << IDE); //rx mob
-            CANSTMOB = 0x00;
-            return 1;
-        }
-        --timeout_counter;
-    }
-    return 0;
-}
-
+static uint8_t seqnum = 0;
 
 void write_page(uint16_t page, uint16_t dst_id) {
     uint16_t bytes_remain = SPM_PAGESIZE;
@@ -75,10 +27,11 @@ void write_page(uint16_t page, uint16_t dst_id) {
         CAN_get_msg_blocking(&cm);
 
         h9msg_t cm_res;
-        CAN_init_new_msg(&cm_res);
+
         cm_res.priority = H9MSG_PRIORITY_HIGH;
-        cm_res.seqnum = cm.seqnum;
+        cm_res.source_id = can_node_id;
         cm_res.destination_id = dst_id;
+        cm_res.seqnum = cm.seqnum;
 
         if (cm.source_id == dst_id && cm.type == H9MSG_TYPE_PAGE_FILL && cm.dlc == 8) {
             uint16_t w = cm.data[1] << 8;
@@ -115,7 +68,7 @@ void write_page(uint16_t page, uint16_t dst_id) {
                 boot_spm_busy_wait();
                 boot_rww_enable();
 
-                CAN_put_msg(&cm_res);
+                CAN_put_msg_blocking(&cm_res);
                 break;
             }
             else {
@@ -123,13 +76,14 @@ void write_page(uint16_t page, uint16_t dst_id) {
                 cm_res.dlc = 2;
                 cm_res.data[0] = (bytes_remain >> 8) & 0xff;
                 cm_res.data[1] = (bytes_remain) & 0xff;
-                CAN_put_msg(&cm_res);
+                CAN_put_msg_blocking(&cm_res);
             }
         }
         else if (cm.source_id == dst_id && (cm.type & H9MSG_TYPE_GROUP_MASK) == H9MSG_TYPE_GROUP_0) {
             cm_res.type = H9MSG_TYPE_PAGE_FILL_BREAK;
+            cm_res.dlc = 0;
 
-            CAN_put_msg(&cm_res);
+            CAN_put_msg_blocking(&cm_res);
             break;
         }
     }
@@ -146,22 +100,23 @@ int main(void) {
     cli();
     PORTC = (PORTC & 0x0C) | (0xaa & 0xF3);
     PORTD = (PORTD & 0xFC) | ((0xaa>>2) & 0x03);
-    
-    init_bootloader_CAN();
+
+    CAN_init();
     
     h9msg_t turn_on_msg;
-    CAN_init_new_msg(&turn_on_msg);
 
     turn_on_msg.type = H9MSG_TYPE_BOOTLOADER_TURNED_ON;
     turn_on_msg.priority = H9MSG_PRIORITY_HIGH;
+    turn_on_msg.source_id = can_node_id;
     turn_on_msg.destination_id = H9MSG_BROADCAST_ID;
+    turn_on_msg.seqnum = seqnum++;
     turn_on_msg.dlc = 5;
     turn_on_msg.data[0] = BOOTLOADER_VERSION_MAJOR;
     turn_on_msg.data[1] = BOOTLOADER_VERSION_MINOR;
     turn_on_msg.data[2] = NODE_CPU_TYPE;
     turn_on_msg.data[3] = (NODE_TYPE >> 8) & 0xff;
     turn_on_msg.data[4] = (NODE_TYPE) & 0xff;
-    CAN_put_msg(&turn_on_msg);
+    CAN_put_msg_blocking(&turn_on_msg);
     
     while (1) {
         h9msg_t cm;
@@ -170,16 +125,16 @@ int main(void) {
                 uint16_t page = cm.data[0] << 8 | cm.data[1];
 
                 h9msg_t cm_res;
-                CAN_init_new_msg(&cm_res);
-
-                cm_res.destination_id = cm.source_id;
-                cm_res.seqnum = cm.seqnum;
                 cm_res.type = H9MSG_TYPE_PAGE_FILL_NEXT;
+                cm_res.priority = H9MSG_PRIORITY_HIGH;
+                cm_res.source_id = can_node_id;
+                cm_res.destination_id = cm.source_id;
+                cm_res.seqnum = seqnum++;
                 cm_res.dlc = 2;
                 cm_res.data[0] = (SPM_PAGESIZE >> 8) & 0xff;
                 cm_res.data[1] = (SPM_PAGESIZE) & 0xff;
 
-                CAN_put_msg(&cm_res);
+                CAN_put_msg_blocking(&cm_res);
 
                 write_page(page, cm.source_id);
             }
@@ -189,7 +144,8 @@ int main(void) {
             }
         }
         else {
-            CAN_put_msg(&turn_on_msg);
+            turn_on_msg.seqnum = seqnum++;
+            CAN_put_msg_blocking(&turn_on_msg);
         }
     }
 }

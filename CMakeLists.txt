@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
 project(h9avr-bootloader VERSION 1.0)
 
-set(SOURCE_FILES bootloader.c common.c common.h h9msg.h)
+set(SOURCE_FILES bootloader.c can.c can.h h9msg.h)
 set(PATHS "/usr/local/bin/  /opt/local/bin/")
 
 function(add_additional_clean_file FILENAME)
