@@ -1,14 +1,9 @@
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.7)
 
-project(h9avr-bootloader)
+project(h9avr-bootloader VERSION 1.0)
 
 set(SOURCE_FILES bootloader.c common.c common.h h9msg.h)
-
-configure_file(config.h.in config.h)
-
-set(CMAKE_SYSTEM_NAME Generic)
-
-set(PATHS "/usr/local/bin/")
+set(PATHS "/usr/local/bin/  /opt/local/bin/")
 
 function(add_additional_clean_file FILENAME)
     get_directory_property(EXTRA_CLEAN_FILES ADDITIONAL_MAKE_CLEAN_FILES)
@@ -25,6 +20,8 @@ find_program(AVR_OBJCOPY avr-objcopy PATHS ${PATHS})
 find_program(AVR_SIZE avr-size PATHS ${PATHS})
 find_program(AVRDUDE avrdude PATHS ${PATHS})
 
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR avr)
 set(CMAKE_C_COMPILER ${AVR_C_COMPILER})
 
 if(NOT BUILD_DIRECTORY)
@@ -53,6 +50,22 @@ endif(NOT MMCU)
 if(NOT BOOTSTART)
     message(FATAL_ERROR "BOOTSTART variable is not defined")
 endif(NOT BOOTSTART)
+
+
+set(BOOTLOADER_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+if (${MMCU} STREQUAL "atmega16m1")
+    set(NODE_CPU_TYPE 1)
+elseif (${MMCU} STREQUAL "atmega32m1")
+    set(NODE_CPU_TYPE 2)
+elseif (${MMCU} STREQUAL "atmega64m1")
+    set(NODE_CPU_TYPE 3)
+elseif (${MMCU} STREQUAL "at90can128")
+    set(NODE_CPU_TYPE 4)
+else()
+    message(FATAL_ERROR "Unsupported ${MMCU}, can not set NODE_CPU_TYPE")
+endif()
+configure_file(config.h.in config.h)
+
 
 message(STATUS "Building ${PROJECT_NAME} for ${MMCU} with frequency ${FREQ} at ${BOOTSTART}")
 message(STATUS "Source files: ${SOURCE_FILES}")
