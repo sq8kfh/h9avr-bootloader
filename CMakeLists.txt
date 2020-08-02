@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.7)
 project(h9avr-bootloader VERSION 1.0)
 
 set(SOURCE_FILES bootloader.c can.c can.h h9msg.h)
-set(PATHS "/usr/local/bin/  /opt/local/bin/")
+set(PATHS "/usr/local/bin/")
 
 function(add_additional_clean_file FILENAME)
     get_directory_property(EXTRA_CLEAN_FILES ADDITIONAL_MAKE_CLEAN_FILES)
@@ -51,8 +51,11 @@ if(NOT BOOTSTART)
     message(FATAL_ERROR "BOOTSTART variable is not defined")
 endif(NOT BOOTSTART)
 
+if(NOT NODE_TYPE)
+    message(FATAL_ERROR "NODE_TYPE variable is not defined")
+endif(NOT NODE_TYPE)
 
-set(BOOTLOADER_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+
 if (${MMCU} STREQUAL "atmega16m1")
     set(NODE_CPU_TYPE 1)
 elseif (${MMCU} STREQUAL "atmega32m1")
@@ -101,4 +104,4 @@ add_custom_target("flash_bl"
         ${AVRDUDE} -p ${MMCU} -c ${PROGRAMMER} -U ${HEX_FILE}
         DEPENDS ${PROJECT_NAME}
         COMMENT "Uploading bootloader"
-        )
+)
