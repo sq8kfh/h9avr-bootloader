@@ -1,5 +1,5 @@
 # h9avr-can
-CAN common lib and a bootloader for a h9 project.
+AVR bootloader for a h9 project.
 
 ## Example
 ```
