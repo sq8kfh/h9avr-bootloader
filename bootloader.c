@@ -79,7 +79,7 @@ void write_page(uint16_t page, uint16_t dst_id) {
                 CAN_put_msg_blocking(&cm_res);
             }
         }
-        else if (cm.source_id == dst_id && (cm.type & H9MSG_TYPE_GROUP_MASK) == H9MSG_TYPE_GROUP_0) {
+        else if (cm.source_id == dst_id && (cm.type & H9MSG_BOOTLOADER_MSG_GROUP_MASK) == H9MSG_BOOTLOADER_MSG_GROUP) {
             cm_res.type = H9MSG_TYPE_PAGE_FILL_BREAK;
             cm_res.dlc = 0;
 
