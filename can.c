@@ -86,7 +86,7 @@ uint8_t CAN_get_msg_blocking(h9msg_t *cm) {
 
             cm->priority = (canidt1 >> 7) & 0x01;
             cm->type = (canidt1 >> 2) & 0x1f;
-            cm->seqnum = ((canidt1 >> 5) & 0x18) | ((canidt2 >> 5) & 0x0f);
+            cm->seqnum = ((canidt1 << 3) & 0x18) | ((canidt2 >> 5) & 0x07);
             cm->destination_id = ((canidt2 << 4) & 0x1f0) | ((canidt3 >> 4) & 0x0f);
             cm->source_id = ((canidt3 << 5) & 0x1e0) | ((canidt4 >> 3) & 0x1f);
 
