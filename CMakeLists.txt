@@ -56,17 +56,6 @@ if(NOT NODE_TYPE)
 endif(NOT NODE_TYPE)
 
 
-if (${MMCU} STREQUAL "atmega16m1")
-    set(NODE_CPU_TYPE 1)
-elseif (${MMCU} STREQUAL "atmega32m1")
-    set(NODE_CPU_TYPE 2)
-elseif (${MMCU} STREQUAL "atmega64m1")
-    set(NODE_CPU_TYPE 3)
-elseif (${MMCU} STREQUAL "at90can128")
-    set(NODE_CPU_TYPE 4)
-else()
-    message(FATAL_ERROR "Unsupported ${MMCU}, can not set NODE_CPU_TYPE")
-endif()
 configure_file(config.h.in config.h)
 
 

@@ -113,7 +113,17 @@ int main(void) {
     turn_on_msg.dlc = 5;
     turn_on_msg.data[0] = BOOTLOADER_VERSION_MAJOR;
     turn_on_msg.data[1] = BOOTLOADER_VERSION_MINOR;
-    turn_on_msg.data[2] = NODE_CPU_TYPE;
+#if defined (__AVR_ATmega16M1__)
+    turn_on_msg.data[2] = 0x01;
+#elif defined (__AVR_ATmega32M1__)
+    turn_on_msg.data[2] = 0x02;
+#elif defined (__AVR_ATmega64M1__)
+    turn_on_msg.data[2] = 0x03;
+#elif defined (__AVR_AT90CAN128__)
+    turn_on_msg.data[2] = 0x04;
+#else
+#error Unsupported MCU
+#endif
     turn_on_msg.data[3] = (NODE_TYPE >> 8) & 0xff;
     turn_on_msg.data[4] = (NODE_TYPE) & 0xff;
     CAN_put_msg_blocking(&turn_on_msg);
