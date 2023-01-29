@@ -1,9 +1,20 @@
 cmake_minimum_required(VERSION 3.7)
 
+find_program(AVR_C_COMPILER avr-gcc)
+find_program(AVR_CXX_COMPILER avr-g++)
+find_program(AVR_OBJCOPY avr-objcopy)
+find_program(AVR_SIZE avr-size)
+find_program(AVRDUDE avrdude)
+
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR avr)
+set(CMAKE_C_COMPILER ${AVR_C_COMPILER})
+set(CMAKE_CXX_COMPILER ${AVR_CXX_COMPILER})
+
 project(h9avr-bootloader VERSION 1.1)
 
 set(SOURCE_FILES bootloader.c can.c can.h h9msg.h)
-set(PATHS "/usr/local/bin/")
+set(PATHS "/opt/local/bin/")
 
 function(add_additional_clean_file FILENAME)
     get_directory_property(EXTRA_CLEAN_FILES ADDITIONAL_MAKE_CLEAN_FILES)
@@ -15,14 +26,6 @@ function(add_additional_clean_file FILENAME)
     set_source_files_properties(${FILENAME} PROPERTIES GENERATED TRUE)
 endfunction(add_additional_clean_file)
 
-find_program(AVR_C_COMPILER avr-gcc PATHS ${PATHS})
-find_program(AVR_OBJCOPY avr-objcopy PATHS ${PATHS})
-find_program(AVR_SIZE avr-size PATHS ${PATHS})
-find_program(AVRDUDE avrdude PATHS ${PATHS})
-
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR avr)
-set(CMAKE_C_COMPILER ${AVR_C_COMPILER})
 
 if(NOT BUILD_DIRECTORY)
     set(BUILD_DIRECTORY /build CACHE STRING "Setting build directory to /build")
@@ -85,7 +88,7 @@ add_custom_command(
         TARGET ${PROJECT_NAME}
         POST_BUILD
         COMMAND ${AVR_OBJCOPY} -O ihex -R .eeprom ${ELF_FILE} ${HEX_FILE}
-        COMMAND ${AVR_SIZE} ${ELF_FILE} --mcu=${MMCU} --format=avr
+        #COMMAND ${AVR_SIZE} ${ELF_FILE} --mcu=${MMCU} --format=avr
         COMMENT "Post processsing"
 )
 
