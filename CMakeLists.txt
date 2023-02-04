@@ -36,8 +36,6 @@ if(NOT SOURCE_FILES)
     message(FATAL_ERROR "SOURCE_FILES variable is not defined")
 endif(NOT SOURCE_FILES)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-
 if(NOT FREQ)
     message(FATAL_ERROR "FREQ variable is not defined")
 endif(NOT FREQ)
@@ -76,11 +74,35 @@ add_additional_clean_file(${ELF_FILE})
 add_additional_clean_file(${HEX_FILE})
 add_additional_clean_file(${EEP_FILE})
 
+add_compile_options(
+        -mmcu=${MMCU}
+        -I.
+        -gdwarf-2
+        -DF_CPU=${FREQ}UL
+        -Os
+        -funsigned-char
+        -funsigned-bitfields
+        -fpack-struct
+        -fshort-enums
+        -Wall
+        -Wno-unknown-pragmas
+        -Wstrict-prototypes
+        -Wundef
+        -std=gnu99
+        -Wl,--gc-section
+)
+
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 12.0)
+    add_compile_options(--param=min-pagesize=0)
+    message(STATUS "GCC version >=12 add: --param=min-pagesize=0")
+endif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 12.0)
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
 set_target_properties(
         ${PROJECT_NAME}
         PROPERTIES
         OUTPUT_NAME ${ELF_FILENAME}
-        COMPILE_FLAGS "-mmcu=${MMCU} -I. -gdwarf-2 -DF_CPU=${FREQ}UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -Wall -Wno-unknown-pragmas -Wstrict-prototypes -Wundef -std=gnu99 -Wl,--gc-section"
         LINK_FLAGS "-mmcu=${MMCU} -Wl,--section-start=.text=${BOOTSTART} -I. -gdwarf-2 -DF_CPU=${FREQ}UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -Wall -Wno-unknown-pragmas -Wstrict-prototypes -Wundef -std=gnu99 -Wundef -MD -MP -MF .dep/main.elf.d --output ${ELF_FILE} -Wl,-lc,--entry=main"
 )
 
