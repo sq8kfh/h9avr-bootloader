@@ -121,6 +121,8 @@ int main(void) {
     turn_on_msg.data[2] = 0x03;
 #elif defined (__AVR_AT90CAN128__)
     turn_on_msg.data[2] = 0x04;
+#elif defined (__AVR_ATmega32C1__)
+    turn_on_msg.data[2] = 0x05;
 #else
 #error Unsupported MCU
 #endif
