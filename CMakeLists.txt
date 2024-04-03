@@ -12,7 +12,7 @@ set(CMAKE_SYSTEM_PROCESSOR avr)
 set(CMAKE_C_COMPILER ${AVR_C_COMPILER})
 set(CMAKE_CXX_COMPILER ${AVR_CXX_COMPILER})
 
-project(h9avr-bootloader VERSION 1.1)
+project(h9avr-bootloader VERSION 1.2)
 
 set(SOURCE_FILES bootloader.c can.c can.h h9msg.h)
 
