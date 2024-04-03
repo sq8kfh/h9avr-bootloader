@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.10)
+include(CMakeDependentOption)
 
 find_program(AVR_C_COMPILER avr-gcc)
 find_program(AVR_CXX_COMPILER avr-g++)
@@ -14,7 +15,6 @@ set(CMAKE_CXX_COMPILER ${AVR_CXX_COMPILER})
 project(h9avr-bootloader VERSION 1.1)
 
 set(SOURCE_FILES bootloader.c can.c can.h h9msg.h)
-set(PATHS "/opt/local/bin/")
 
 function(add_additional_clean_file FILENAME)
     get_directory_property(EXTRA_CLEAN_FILES ADDITIONAL_MAKE_CLEAN_FILES)
@@ -63,6 +63,9 @@ configure_file(config.h.in config.h)
 message(STATUS "Building ${PROJECT_NAME} for ${MMCU} with frequency ${FREQ} at ${BOOTSTART}")
 message(STATUS "Source files: ${SOURCE_FILES}")
 message(STATUS "Using flags: ${CMAKE_C_FLAGS}")
+message(STATUS "MCU: ${MMCU}")
+message(STATUS "F_CPU: ${FREQ}Hz")
+message(STATUS "BOOTSTART: ${BOOTSTART}")
 
 set(ELF_FILENAME ${PROJECT_NAME}.elf)
 
@@ -110,7 +113,7 @@ add_custom_command(
         TARGET ${PROJECT_NAME}
         POST_BUILD
         COMMAND ${AVR_OBJCOPY} -O ihex -R .eeprom ${ELF_FILE} ${HEX_FILE}
-        #COMMAND ${AVR_SIZE} ${ELF_FILE} --mcu=${MMCU} --format=avr
+        COMMAND ${AVR_SIZE} --format=gnu ${ELF_FILE}
         COMMENT "Post processsing"
 )
 
